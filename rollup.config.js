@@ -55,8 +55,9 @@ export default [
   {
     input: 'src/main.ts',
     output: [
-      { file: 'dist/bundle.js', format: 'esm', sourcemap: true }
+      { dir: 'dist', format: 'esm', sourcemap: true }
     ],
-    plugins
+    plugins,
+    preserveEntrySignatures: false
   },
 ];

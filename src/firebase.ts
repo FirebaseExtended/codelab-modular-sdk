@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import firebase from 'firebase/compat/app';
+import { initializeApp } from 'firebase/app';
 import { initializeAuth, indexedDBLocalPersistence } from 'firebase/auth';
-import 'firebase/compat/firestore';
+import { getFirestore } from 'firebase/firestore/lite';
 
-export const app = firebase.initializeApp({
+export const app = initializeApp({
     apiKey: "AIzaSyBnRKitQGBX0u8k4COtDTILYxCJuMf7xzE",
     authDomain: "exchange-rates-adcf6.firebaseapp.com",
     databaseURL: "https://exchange-rates-adcf6.firebaseio.com",
@@ -27,12 +27,5 @@ export const app = firebase.initializeApp({
     appId: "1:875614679042:web:5813c3e70a33e91ba0371b"
 });
 
-export const firebaseAuth = initializeAuth(app, { persistence: [ indexedDBLocalPersistence ] });
-
-export const firestore = app.firestore();
-
-export const FirestoreFieldValue = firebase.firestore.FieldValue;
-
-export const FirestoreFieldPath = firebase.firestore.FieldPath;
-
-export type QuerySnapshot = firebase.firestore.QuerySnapshot;
+export const firebaseAuth = initializeAuth(app, { persistence: [indexedDBLocalPersistence] });
+export const firestore = getFirestore(app);

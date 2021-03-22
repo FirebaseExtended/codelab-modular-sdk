@@ -13,18 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { firestore, FirestoreFieldPath, FirestoreFieldValue, QuerySnapshot } from './firebase';
+import { firestore } from './firebase';
 import { User } from './auth'
 import { PriceChangeRemote, SearchResult, TickerChange } from './models';
+import { 
+    collection, 
+    getDocs, 
+    doc, 
+    setDoc, 
+    arrayUnion, 
+    arrayRemove, 
+    query, 
+    where, 
+    documentId, 
+    QuerySnapshot, 
+    getDoc // add this import
+} from 'firebase/firestore/lite';
 import { logPerformance } from './perf';
 
 export async function search(input: string): Promise<SearchResult[]> {
-
-    if (!input) {
+    if(!input) {
         return [];
     }
-
-    const tickers = await firestore.collection('current').get();
+    
+    const tickersCollRef = collection(firestore, 'current');
+    const tickers = await getDocs(tickersCollRef);
 
     const result: SearchResult[] = [];
     // firestore doesn't support text search, so we filter on client side instead.
@@ -43,84 +56,53 @@ export async function search(input: string): Promise<SearchResult[]> {
     return result;
 }
 
+export async function getTickerChanges(tickers: string[]): Promise<TickerChange[]> {
+
+    if (tickers.length === 0) {
+        return [];
+    }
+
+    const priceQuery = query(
+        collection(firestore, 'current'),
+        where(documentId(), 'in', tickers)
+    );
+    const snapshot = await getDocs<PriceChangeRemote>(priceQuery);
+    performance && performance.measure("initial-data-load");
+    logPerformance();
+    return formatSDKStocks(snapshot);
+}
+
+export async function getTickers(user: User): Promise<string[]> {
+    const watchlistRef = doc(firestore, `watchlist/${user.uid}`);
+    const data =  (await getDoc(watchlistRef)).data();
+
+    return data ? data.tickers : [];
+}
+
+export async function getAllTickerChanges(): Promise<TickerChange[]> {
+    const collRef = collection(firestore, 'current');
+    const snapshot = await getDocs<PriceChangeRemote>(collRef);
+    performance && performance.measure("initial-data-load");
+    logPerformance();
+    return formatSDKStocks(snapshot);
+}
+
 export function addToWatchList(ticker: string, user: User) {
-    return firestore.collection('watchlist').doc(user.uid).set({
-        tickers: FirestoreFieldValue.arrayUnion(ticker)
+    const watchlistRef = doc(firestore, `watchlist/${user.uid}`);
+    return setDoc(watchlistRef, {
+        tickers: arrayUnion(ticker)
     }, { merge: true });
 }
 
 export function deleteFromWatchList(ticker: string, user: User) {
-    return firestore.collection('watchlist').doc(user.uid).set({
-        tickers: FirestoreFieldValue.arrayRemove(ticker)
+    const watchlistRef = doc(firestore, `watchlist/${user.uid}`);
+    return setDoc(watchlistRef, {
+        tickers: arrayRemove(ticker)
     }, { merge: true });
 }
 
-type TickerChangesCallBack = (changes: TickerChange[]) => void
-let firstload = true;
-/**
- * The function subscribes to user's watchlist, then subscribe to the price changes for the tickers in the watchlist.
- * Whenever there is a change to user's watchlist, it unsubscribe and subscribe again using the latest list of tickers in the wathclist.
- * 
- * @param user - the user whose watchlist we want to subscribe to
- * @param callback - the callback function that is invoked when price changes for any tickers in the user's watchlist
- * @returns function to unsubscribe
- */
-export function subscribeToTickerChanges(user: User, callback: TickerChangesCallBack) {
-
-    let unsubscribePrevTickerChanges: () => void;
-
-    // Subscribe to watchlist changes. We will get an update whenever a ticker is added/deleted to the watchlist
-    const unsubscribe = firestore.collection('watchlist').doc(user.uid).onSnapshot(snapshot => {
-        const doc = snapshot.data();
-        const tickers = doc ? doc.tickers : [];
-
-        if (unsubscribePrevTickerChanges) {
-            unsubscribePrevTickerChanges();
-        }
-
-        if (tickers.length === 0) {
-            callback([]);
-        } else {
-            // Subscribe to price changes for tickers in the watchlist
-            unsubscribePrevTickerChanges = firestore
-                .collection('current')
-                .where(FirestoreFieldPath.documentId(), 'in', tickers)
-                .onSnapshot(snapshot => {
-                    if (firstload) {
-                        performance && performance.measure("initial-data-load");
-                        firstload = false;
-                        logPerformance();
-                    }
-
-                    const stocks = formatSDKStocks(snapshot);
-                    callback(stocks);
-                });
-        }
-    });
-    return () => {
-        if (unsubscribePrevTickerChanges) {
-            unsubscribePrevTickerChanges();
-        }
-        unsubscribe();
-    };
-}
-
-export function subscribeToAllTickerChanges(callback: TickerChangesCallBack) {
-    return firestore
-        .collection('current')
-        .onSnapshot(snapshot => {
-            if (firstload) {
-                performance && performance.measure("initialDataLoadTime");
-                firstload = false;
-                logPerformance();
-            }
-            const stocks = formatSDKStocks(snapshot);
-            callback(stocks);
-        });
-}
-
 // Format stock data in Firestore format (returned from `onSnapshot()`)
-export function formatSDKStocks(snapshot: QuerySnapshot): TickerChange[] {
+export function formatSDKStocks(snapshot: QuerySnapshot<PriceChangeRemote>): TickerChange[] {
     const stocks: TickerChange[] = [];
     //@ts-ignore
     snapshot.forEach(docSnap => {

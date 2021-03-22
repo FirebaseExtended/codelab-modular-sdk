@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 import { renderLoginPage, renderUserPage } from './renderer';
+import { getAllTickerChanges, getTickerChanges, getTickers } from './services';
 import { onUserChange } from './auth';
-import { subscribeToAllTickerChanges, subscribeToTickerChanges } from './services';
-import { setUser } from './state';
+import { getState, setRealtimeServicesLoaded, setUser } from './state';
 import './styles.scss';
 
 let unsubscribeTickerChanges: () => void;
 let unsubscribeAllTickerChanges: () => void;
 
-onUserChange(user => {
+const loadRealtimeService = import('./services.realtime');
+loadRealtimeService.then(() => {
+    setRealtimeServicesLoaded(true);
+});
+
+onUserChange(async user => {
     performance && performance.measure("first-meaningful-paint");
     if (unsubscribeAllTickerChanges) {
         unsubscribeAllTickerChanges();
@@ -35,18 +40,29 @@ onUserChange(user => {
     if (user) {
         // user page
         setUser(user);
-        
+
         // show loading screen in 500ms
         const timeoutId = setTimeout(() => {
-            renderLoginPage('Landing page', {
+            renderUserPage(user, {
                 loading: true,
                 tableData: []
             });
         }, 500);
 
-        unsubscribeTickerChanges = subscribeToTickerChanges(user, stockData => {
+        // get data once if realtime serivces haven't been loaded
+        if (!getState().realtimeServicesLoaded) {
+            const tickers = await getTickers(user);
+            const tickerData = await getTickerChanges(tickers);
             clearTimeout(timeoutId);
-            renderUserPage(user, { tableData: stockData })
+            renderUserPage(user, { tableData: tickerData });
+        }
+
+        // subscribe to realtime updates once realtime services are loaded
+        loadRealtimeService.then(({ subscribeToTickerChanges }) => {
+            unsubscribeTickerChanges = subscribeToTickerChanges(user, stockData => {
+                clearTimeout(timeoutId);
+                renderUserPage(user, { tableData: stockData })
+            });
         });
     } else {
         // login page
@@ -59,9 +75,21 @@ onUserChange(user => {
                 tableData: []
             });
         }, 500);
-        unsubscribeAllTickerChanges = subscribeToAllTickerChanges(stockData => {
+
+        // get data once if realtime serivces haven't been loaded
+        if (!getState().realtimeServicesLoaded) {
+            const tickerData = await getAllTickerChanges();
             clearTimeout(timeoutId);
-            renderLoginPage('Landing page', { tableData: stockData })
-        });
+            renderLoginPage('Landing page', { tableData: tickerData });
+        }
+
+        // subscribe to realtime updates once realtime services are loaded
+        loadRealtimeService.then(({ subscribeToAllTickerChanges }) => {
+            unsubscribeAllTickerChanges = subscribeToAllTickerChanges(stockData => {
+                clearTimeout(timeoutId);
+                renderLoginPage('Landing page', { tableData: stockData })
+            });
+        })
     }
 });
+
