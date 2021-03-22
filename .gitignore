@@ -1,0 +1,8 @@
+node_modules
+/build
+/dist
+/*.log
+*.lock
+.firebase
+
+package-lock.json

@@ -1,0 +1,61 @@
+<html>
+<script src="https://www.gstatic.com/firebasejs/8.2.9/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.2.9/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.2.9/firebase-firestore.js"></script>
+<script>
+    firebase.initializeApp({
+        apiKey: "AIzaSyBnRKitQGBX0u8k4COtDTILYxCJuMf7xzE",
+        authDomain: "exchange-rates-adcf6.firebaseapp.com",
+        databaseURL: "https://exchange-rates-adcf6.firebaseio.com",
+        projectId: "exchange-rates-adcf6",
+        storageBucket: "exchange-rates-adcf6.appspot.com",
+        messagingSenderId: "875614679042",
+        appId: "1:875614679042:web:fae3b56fb052a219a0371b"
+    });
+
+
+    firebase.auth().signInWithEmailAndPassword(/* email */, /* password */).then(() => {
+        setInterval(updatePrice, 3000);
+        // updatePrice();
+    });
+
+    async function updatePrice() {
+        const firestore = firebase.firestore();
+
+        const currentDataRef = firestore.doc('metadata/currentData');
+        const currentDataSnap = await currentDataRef.get();
+        let { index, maxIndex } = currentDataSnap.data();
+        if (!index) {
+            index = 1;
+        }
+        const cSnap = await firestore.collection('historical').get();
+        const batch = firestore.batch();
+        let numSymbolsToUpdate = cSnap.size;
+        cSnap.forEach(docSnap => {
+            const symbol = docSnap.id;
+            if (!docSnap.data()) { return; }
+            const dataPoint = docSnap.data().timeSeries[index];
+            const previousDataPoint = docSnap.data().timeSeries[index - 1];
+            if (!dataPoint || !previousDataPoint) {
+                console.log(`Couldn't get data for ${symbol} at index ${index}`);
+                numSymbolsToUpdate--;
+                return;
+            }
+            const delta = dataPoint.closeValue - previousDataPoint.closeValue;
+            const ref = firestore.doc(`current/${symbol}`);
+            batch.set(ref, {
+                ...dataPoint,
+                delta
+            });
+        });
+
+        let newIndex = index + 1;
+        if (newIndex > maxIndex) {
+            newIndex = 1;
+        }
+        batch.update(currentDataRef, { index: newIndex });
+        batch.commit().then(() => console.log('updated!'));
+    }
+</script>
+
+</html>
