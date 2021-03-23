@@ -6,6 +6,9 @@
 
 $border-color: rgb(218, 220, 224);
 $hover-background-color: #fafafa;
+$page-background-color: #3aafa9;
+$positive-color: #137333;
+$negative-color: #a50e0e;
 
 .search {
 	padding: 10px;
@@ -31,6 +34,7 @@ $hover-background-color: #fafafa;
 
     .delete-cell .delete-icon {
         visibility: visible;
+		cursor: pointer;
     }
 }
 
@@ -93,7 +97,7 @@ html, body {
 	width: 100%;
 	padding: 0;
 	margin: 0;
-	background: #3aafa9;
+	background: $page-background-color;
 	font-family: 'Helvetica Neue', arial, sans-serif;
 	font-weight: 400;
 	color: #444;
@@ -181,7 +185,7 @@ html, body {
 #content {
 	display: flex;
 	justify-content: center;
-	background-color: #3aafa9;
+	background-color: $page-background-color;
 }
 .home {
 	padding: 56px 20px;
@@ -233,12 +237,12 @@ html, body {
 	background-color: #feffff;
 
 	&.positive {
-		color: green;
+		color: $positive-color;
 		animation: fadeGreen 1s ease-in-out;
 	}
 
 	&.negative {
-		color: red;
+		color: $negative-color;
 		animation: fadeRed 1s ease-in-out;
 	}
 }
@@ -305,7 +309,7 @@ html, body {
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
   
-  border-bottom: 12px solid green;
+  border-bottom: 12px solid $positive-color;
 }
 
 .arrow-down {
@@ -314,7 +318,7 @@ html, body {
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
   
-  border-top: 12px solid #f00;
+  border-top: 12px solid $negative-color;
 }
 
 button.startStop {
@@ -370,12 +374,12 @@ button.startStop {
 		width: 60px;
 		&.positive {
 			background-color: #e6f4ea;
-			color: #137333;
+			color: $positive-color;
 		}
 
 		&.negative {
 			background-color: #fce8e6;
-			color: #a50e0e;
+			color: $negative-color;
 		}
 	}
 }

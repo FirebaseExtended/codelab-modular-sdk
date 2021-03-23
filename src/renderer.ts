@@ -303,10 +303,9 @@ export function renderRow(tableEl: HTMLElement, rowData: TickerChange, user: Use
     dateFromCell.innerText = new Date(timestamp).toLocaleString();
     rowEl.append(dateFromCell);
 
+    const deleteCell = document.createElement('div');
+    deleteCell.className = 'cell delete-cell';
     if (user) {
-        const deleteCell = document.createElement('div');
-        deleteCell.className = 'cell delete-cell';
-
         const deleteIcon = document.createElement('div');
         deleteIcon.className = 'delete-icon';
         deleteIcon.innerText = 'X';
@@ -316,9 +315,8 @@ export function renderRow(tableEl: HTMLElement, rowData: TickerChange, user: Use
         deleteCell.addEventListener('click', () => {
             deleteFromWatchList(symbol, user);
         });
-
-        rowEl.append(deleteCell);
     }
+    rowEl.append(deleteCell);
 
     tableEl.append(rowEl);
 }
