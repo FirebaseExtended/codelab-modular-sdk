@@ -1,7 +1,7 @@
 import { signInAnonymously, signOut, User } from './auth';
 import { getState, setUserPageCreated } from './state';
 import { addToWatchList, deleteFromWatchList, search } from './services';
-import { TickerChange } from './models';
+import { SearchResult, TickerChange } from './models';
 
 const headerEl = document.getElementById("header")!;
 const contentHomeEl = document.getElementById("home")!;
@@ -140,8 +140,11 @@ function renderAddTickerButton(container: HTMLElement) {
         if (dropdownContainer.classList.contains('is-active')) {
             dropdownContainer.classList.remove('is-active');
         } else {
-            dropdownContainer.classList.add('is-active');
+            // reset input and results
+            searchInput.value = '';
+            searchResultsContainer.innerHTML = '';
 
+            dropdownContainer.classList.add('is-active');
             // focus on the input box
             setTimeout(() => searchInput.focus(), 100);
         }
@@ -161,27 +164,51 @@ function renderAddTickerButton(container: HTMLElement) {
         cancelPrevious = setTimeout(async () => {
             const searchResults = await search(searchInput.value);
             searchResultsContainer.innerHTML = '';
-            renderSearchResults(searchResults, searchResultsContainer);
-        }, 1500) as unknown as number;
+            renderSearchResults(searchInput.value, searchResults, searchResultsContainer);
+        }, 500) as unknown as number;
     });
 
 
 }
 
-function renderSearchResults(tickers: string[], container: HTMLElement) {
+function renderSearchResults(keyword: string, searchResults: SearchResult[], container: HTMLElement) {
 
     const dropdownContainer = document.querySelector('.dropdown')!;
-    for (const ticker of tickers) {
+
+    if (searchResults.length === 0) {
         const tickerRow = document.createElement('div');
         tickerRow.className = "dropdown-item";
-        tickerRow.innerText = ticker;
+        tickerRow.innerText = "No matches...";
         container.append(tickerRow);
+    } else {
+        for (const searchResult of searchResults) {
+            const tickerRow = document.createElement('div');
+            tickerRow.className = "dropdown-item";
 
-        tickerRow.addEventListener('click', () => {
-            addToWatchList(ticker, getState().user!);
-            // close dropdown
-            dropdownContainer.classList.remove('is-active');
-        });
+            const symbol = document.createElement('div');
+            symbol.className = 'symbol';
+            symbol.appendChild(createHighlightedString(searchResult.symbol, keyword));
+            tickerRow.appendChild(symbol);
+
+            const price = document.createElement('div');
+            price.className = 'price';
+            price.innerText = formatDollar(searchResult.value);
+            tickerRow.appendChild(price);
+
+            const change = document.createElement('div');
+            change.className = `change ${searchResult.delta && searchResult.delta > 0 ? 'positive' : 'negative'}`;
+
+            change.innerText = formatDollar(searchResult.delta, { deltaSign: true });
+            tickerRow.appendChild(change);
+
+            container.append(tickerRow);
+
+            tickerRow.addEventListener('click', () => {
+                addToWatchList(searchResult.symbol, getState().user!);
+                // close dropdown
+                dropdownContainer.classList.remove('is-active');
+            });
+        }
     }
 }
 
@@ -233,9 +260,9 @@ function renderLoadingRow(tableEl: HTMLElement) {
 export function renderRow(tableEl: HTMLElement, rowData: TickerChange, user: User | null) {
     const { symbol, value, delta, timestamp } = rowData;
     const changeClasses = ["cell"];
-    if (delta > 0) {
+    if (delta && delta > 0) {
         changeClasses.push("positive");
-    } else if (delta < 0) {
+    } else if (delta && delta < 0) {
         changeClasses.push("negative");
     }
     const rowEl = document.createElement("div");
@@ -262,7 +289,7 @@ export function renderRow(tableEl: HTMLElement, rowData: TickerChange, user: Use
     const arrowCell = document.createElement("div");
     arrowCell.className = "cell";
     const arrow = document.createElement("div");
-    arrow.className = delta > 0 ? "arrow-up" : "arrow-down";
+    arrow.className = delta && delta > 0 ? "arrow-up" : "arrow-down";
     arrowCell.append(arrow);
     rowEl.append(arrowCell);
 
@@ -329,4 +356,37 @@ export function renderHeader(title: string, user: User | null) {
 
     navEl.append(loginOrLogoutButton);
     headerEl.append(navEl);
+}
+
+function formatDollar(input?: number, options?: { deltaSign?: boolean }): string {
+
+    const defaultOptions = {
+        deltaSign: false
+    };
+
+    const { deltaSign } = { ...defaultOptions, ...options };
+
+    if (!input) {
+        return '-';
+    }
+
+    if (input >= 0) {
+        return `${deltaSign ? '+' : ''}$${input.toFixed(2)}`;
+    } else {
+        return `${deltaSign ? '-': ''}$${Math.abs(input).toFixed(2)}`;
+    }
+}
+
+function createHighlightedString(text: string, keyword: string): HTMLElement {
+    const container = document.createElement('span');
+
+    const matchPosition = text.toLowerCase().indexOf(keyword.toLowerCase());
+    const matchEndPosition = matchPosition + keyword.length;
+    
+    const start = text.slice(0, matchPosition);
+    const match = text.slice(matchPosition, matchEndPosition);
+    const end = text.slice(matchEndPosition);
+    container.innerHTML = `${start}<em>${match}</em>${end}`
+
+    return container;
 }

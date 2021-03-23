@@ -231,22 +231,24 @@ html, body {
 	text-align: center;
 	border-bottom: 1px solid #17252A;
 	background-color: #feffff;
+
+	&.positive {
+		color: green;
+		animation: fadeGreen 1s ease-in-out;
+	}
+
+	&.negative {
+		color: red;
+		animation: fadeRed 1s ease-in-out;
+	}
 }
 
-.positive {
-	color: green;
-	animation: fadeGreen 1s ease-in-out;
-}
+
 
 @keyframes fadeGreen {
 	0%   { background-color: #FFFFFF; }
 	50%  { background-color: rgba(63, 191, 63, 0.5); }
 	100% { background-color: #FFFFFF; }
-}
-
-.negative {
-	color: red;
-	animation: fadeRed 1s ease-in-out;
 }
 
 @keyframes fadeRed {
@@ -328,11 +330,14 @@ button.startStop {
 	margin: 10px 0;
 }
 
+.dropdown-content {
+	min-width: 400px;
+}
+
 .dropdown-item {
 	display: flex;
 	align-items: center;
 	height: 40px;
-	vertical-align: center;
 	cursor: pointer;
 
 	&:not(:first-child) {
@@ -342,4 +347,40 @@ button.startStop {
 	&:hover {
 		background-color: $hover-background-color;
 	}
+
+	.symbol {
+		flex: 1;
+	}
+
+	.price, .change {
+		flex: 0 0 auto;
+		margin-left: 20px;
+	}
+
+	.price {
+		font-weight: 500;
+		font-size: 16px; 
+	}
+
+	.change {
+		display: flex;
+		justify-content: center;
+		padding: 3px 8px;
+		border-radius: 8px;
+		width: 60px;
+		&.positive {
+			background-color: #e6f4ea;
+			color: #137333;
+		}
+
+		&.negative {
+			background-color: #fce8e6;
+			color: #a50e0e;
+		}
+	}
+}
+
+em {
+	font-weight: bold;
+	font-style: normal;
 }

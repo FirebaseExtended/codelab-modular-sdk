@@ -1,16 +1,27 @@
 import { firestore, FirestoreFieldPath, FirestoreFieldValue, Snapshot } from './firebase';
 import { User } from './auth'
-import { TickerChange } from './models';
+import { PriceChangeRemote, SearchResult, TickerChange } from './models';
 import { logPerformance } from './perf';
 
-export async function search(input: string): Promise<string[]> {
+export async function search(input: string): Promise<SearchResult[]> {
+
+    if (!input) {
+        return [];
+    }
+
     const tickers = await firestore.collection('current').get();
 
-    const result: string[] = [];
+    const result: SearchResult[] = [];
     // firestore doesn't support text search, so we filter on client side instead.
     tickers.forEach(ticker => {
         if (ticker.id.toLowerCase().includes(input.toLowerCase())) {
-            result.push(ticker.id);
+            const { closeValue, delta, timestamp } = ticker.data() as PriceChangeRemote;
+            result.push({
+                symbol: ticker.id,
+                value: closeValue,
+                delta,
+                timestamp
+            });
         }
     });
 
@@ -49,7 +60,7 @@ export function subscribeToTickerChanges(user: User, callback: TickerChangesCall
                 .collection('current')
                 .where(FirestoreFieldPath.documentId(), 'in', tickers)
                 .onSnapshot(snapshot => {
-                    if(firstload) {
+                    if (firstload) {
                         performance && performance.measure("initialDataLoadTime");
                         firstload = false;
                         logPerformance();
@@ -67,7 +78,7 @@ export function subscribeToAllTickerChanges(callback: TickerChangesCallBack) {
     return firestore
         .collection('current')
         .onSnapshot(snapshot => {
-            if(firstload) {
+            if (firstload) {
                 performance && performance.measure("initialDataLoadTime");
                 firstload = false;
                 logPerformance();
