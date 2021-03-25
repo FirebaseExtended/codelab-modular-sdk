@@ -86,7 +86,12 @@ export function subscribeToTickerChanges(user: User, callback: TickerChangesCall
                 });
         }
     });
-    return unsubscribe;
+    return () => {
+        if (unsubscribePrevTickerChanges) {
+            unsubscribePrevTickerChanges();
+        }
+        unsubscribe();
+    };
 }
 
 export function subscribeToAllTickerChanges(callback: TickerChangesCallBack) {
