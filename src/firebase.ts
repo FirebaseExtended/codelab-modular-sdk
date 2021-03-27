@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import firebase from 'firebase/compat/app';
-import 'firebase/compat/auth';
+import { initializeAuth, indexedDBLocalPersistence } from 'firebase/auth';
 import 'firebase/compat/firestore';
 
 export const app = firebase.initializeApp({
@@ -27,7 +27,7 @@ export const app = firebase.initializeApp({
     appId: "1:875614679042:web:5813c3e70a33e91ba0371b"
 });
 
-export const firebaseAuth = app.auth();
+export const firebaseAuth = initializeAuth(app, { persistence: [ indexedDBLocalPersistence ] });
 
 export const firestore = app.firestore();
 
@@ -36,5 +36,3 @@ export const FirestoreFieldValue = firebase.firestore.FieldValue;
 export const FirestoreFieldPath = firebase.firestore.FieldPath;
 
 export type QuerySnapshot = firebase.firestore.QuerySnapshot;
-
-export type User = firebase.User;
