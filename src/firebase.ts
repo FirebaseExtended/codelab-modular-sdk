@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import firebase from 'firebase/app';
-import 'firebase/auth';
-import 'firebase/firestore';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
+import 'firebase/compat/firestore';
 
 export const app = firebase.initializeApp({
     apiKey: "AIzaSyBnRKitQGBX0u8k4COtDTILYxCJuMf7xzE",

@@ -122,6 +122,7 @@ export function subscribeToAllTickerChanges(callback: TickerChangesCallBack) {
 // Format stock data in Firestore format (returned from `onSnapshot()`)
 export function formatSDKStocks(snapshot: QuerySnapshot): TickerChange[] {
     const stocks: TickerChange[] = [];
+    //@ts-ignore
     snapshot.forEach(docSnap => {
         if (!docSnap.data()) return;
         const symbol = docSnap.id;
