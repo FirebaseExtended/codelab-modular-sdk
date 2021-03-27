@@ -128,11 +128,11 @@ function renderAddTickerButton(container: HTMLElement) {
     container.innerHTML = `
         <div class="dropdown is-right">
             <div class="dropdown-trigger">
-                <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
+                <div class="add-button">
                     <span>+ Add</span>
-                </button>
+                </div>
             </div>
-            <div class="dropdown-menu" id="dropdown-menu" role="menu">
+            <div class="dropdown-menu" id="dropdown-menu">
                 <div class="dropdown-content">
                     <div class="search">
                        <input class="search-input" placeholder="Type a symbol" type="text"/>
