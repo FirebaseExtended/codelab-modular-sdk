@@ -76,7 +76,7 @@ export function subscribeToTickerChanges(user: User, callback: TickerChangesCall
                 .where(FirestoreFieldPath.documentId(), 'in', tickers)
                 .onSnapshot(snapshot => {
                     if (firstload) {
-                        performance && performance.measure("initialDataLoadTime");
+                        performance && performance.measure("initial-data-load");
                         firstload = false;
                         logPerformance();
                     }

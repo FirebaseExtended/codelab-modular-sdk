@@ -351,14 +351,14 @@ export function renderHeader(title: string, user: User | null) {
     const loginOrLogoutButton = document.createElement('button');
 
     if (!user) { // render login button
-        loginOrLogoutButton.textContent = 'login';
+        loginOrLogoutButton.textContent = 'LOG-IN';
         loginOrLogoutButton.className = 'login-button';
 
         loginOrLogoutButton.addEventListener('click', () => {
             signInAnonymously();
         });
     } else { // render logout button
-        loginOrLogoutButton.textContent = 'logout';
+        loginOrLogoutButton.textContent = 'LOG-OUT';
         loginOrLogoutButton.className = 'login-button';
 
         loginOrLogoutButton.addEventListener('click', () => {

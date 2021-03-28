@@ -23,7 +23,7 @@ let unsubscribeTickerChanges: () => void;
 let unsubscribeAllTickerChanges: () => void;
 
 firebaseAuth.onAuthStateChanged(user => {
-    performance && performance.measure("firstAppPaint");
+    performance && performance.measure("first-meaningful-paint");
     if (unsubscribeAllTickerChanges) {
         unsubscribeAllTickerChanges();
     }
