@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import { renderLoginPage, renderUserPage } from './renderer';
-import { firebaseAuth } from './firebase';
+import { onUserChange } from './auth';
 import { subscribeToAllTickerChanges, subscribeToTickerChanges } from './services';
 import { setUser } from './state';
 import './styles.scss';
@@ -22,7 +22,7 @@ import './styles.scss';
 let unsubscribeTickerChanges: () => void;
 let unsubscribeAllTickerChanges: () => void;
 
-firebaseAuth.onAuthStateChanged(user => {
+onUserChange(user => {
     performance && performance.measure("first-meaningful-paint");
     if (unsubscribeAllTickerChanges) {
         unsubscribeAllTickerChanges();
