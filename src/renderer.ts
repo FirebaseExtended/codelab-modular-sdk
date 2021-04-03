@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { signInAnonymously, signOut, User } from './auth';
+import { firebaseSignInAnonymously, firebaseSignOut, User } from './auth';
 import { getState, setUserPageCreated } from './state';
 import { addToWatchList, deleteFromWatchList, search } from './services';
 import { SearchResult, TickerChange } from './models';
@@ -355,14 +355,14 @@ export function renderHeader(title: string, user: User | null) {
         loginOrLogoutButton.className = 'login-button';
 
         loginOrLogoutButton.addEventListener('click', () => {
-            signInAnonymously();
+            firebaseSignInAnonymously();
         });
     } else { // render logout button
         loginOrLogoutButton.textContent = 'LOG-OUT';
         loginOrLogoutButton.className = 'login-button';
 
         loginOrLogoutButton.addEventListener('click', () => {
-            signOut();
+            firebaseSignOut();
             setUserPageCreated(false);
         });
     }

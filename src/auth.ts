@@ -16,11 +16,11 @@
 import { firebaseAuth } from './firebase';
 import firebase from 'firebase/app';
 
-export function signInAnonymously() {
+export function firebaseSignInAnonymously() {
     return firebaseAuth.signInAnonymously();
 }
 
-export function signOut() {
+export function firebaseSignOut() {
     return firebaseAuth.signOut();
 }
 
