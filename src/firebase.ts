@@ -36,3 +36,5 @@ export const FirestoreFieldValue = firebase.firestore.FieldValue;
 export const FirestoreFieldPath = firebase.firestore.FieldPath;
 
 export type Snapshot = firebase.firestore.QuerySnapshot;
+
+export type User = firebase.User;

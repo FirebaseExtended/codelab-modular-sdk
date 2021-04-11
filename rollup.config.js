@@ -21,7 +21,6 @@ import scss from 'rollup-plugin-scss'
 import copy from 'rollup-plugin-copy';
 import gzipPlugin from 'rollup-plugin-gzip';
 import visualizer from 'rollup-plugin-visualizer';
-import sizes from 'rollup-plugin-sizes';
 
 const plugins = [
   typescript({
@@ -47,8 +46,7 @@ const plugins = [
       template: 'treemap',
       sourcemap: true,
       gzipSize: true
-  }),
-  sizes()
+  })
 ];
 
 export default [

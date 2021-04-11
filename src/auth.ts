@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { firebaseAuth } from './firebase';
-import firebase from 'firebase/app';
+import { firebaseAuth, User } from './firebase';
 
 export function firebaseSignInAnonymously() {
     return firebaseAuth.signInAnonymously();
@@ -28,4 +27,4 @@ export function onUserChange(callback: (user: User | null) => void) {
     return firebaseAuth.onAuthStateChanged(callback);
 }
 
-export type User = firebase.User;
+export { User } from './firebase';
