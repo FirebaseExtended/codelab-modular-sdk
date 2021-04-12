@@ -57,9 +57,19 @@ export function deleteFromWatchList(ticker: string, user: User) {
 
 type TickerChangesCallBack = (changes: TickerChange[]) => void
 let firstload = true;
+/**
+ * The function subscribes to user's watchlist, then subscribe to the price changes for the tickers in the watchlist.
+ * Whenever there is a change to user's watchlist, it unsubscribe and subscribe again using the latest list of tickers in the wathclist.
+ * 
+ * @param user - the user whose watchlist we want to subscribe to
+ * @param callback - the callback function that is invoked when price changes for any tickers in the user's watchlist
+ * @returns function to unsubscribe
+ */
 export function subscribeToTickerChanges(user: User, callback: TickerChangesCallBack) {
 
     let unsubscribePrevTickerChanges: () => void;
+
+    // Subscribe to watchlist changes. We will get an update whenever a ticker is added/deleted to the watchlist
     const unsubscribe = firestore.collection('watchlist').doc(user.uid).onSnapshot(snapshot => {
         const doc = snapshot.data();
         const tickers = doc ? doc.tickers : [];
@@ -71,6 +81,7 @@ export function subscribeToTickerChanges(user: User, callback: TickerChangesCall
         if (tickers.length === 0) {
             callback([]);
         } else {
+            // Subscribe to price changes for tickers in the watchlist
             unsubscribePrevTickerChanges = firestore
                 .collection('current')
                 .where(FirestoreFieldPath.documentId(), 'in', tickers)
