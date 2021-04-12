@@ -25,6 +25,7 @@ export interface TickerChange {
 export interface AppState {
     user: User | null;
     userPageCreated: boolean;
+    realtimeServicesLoaded: boolean;  // will be used at the last step of the codelab where we dynamically load realtime services
 }
 
 export interface PriceChangeRemote {

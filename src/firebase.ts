@@ -17,7 +17,7 @@ import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
 
-const app = firebase.initializeApp({
+export const app = firebase.initializeApp({
     apiKey: "AIzaSyBnRKitQGBX0u8k4COtDTILYxCJuMf7xzE",
     authDomain: "exchange-rates-adcf6.firebaseapp.com",
     databaseURL: "https://exchange-rates-adcf6.firebaseio.com",
@@ -35,6 +35,6 @@ export const FirestoreFieldValue = firebase.firestore.FieldValue;
 
 export const FirestoreFieldPath = firebase.firestore.FieldPath;
 
-export type Snapshot = firebase.firestore.QuerySnapshot;
+export type QuerySnapshot = firebase.firestore.QuerySnapshot;
 
 export type User = firebase.User;

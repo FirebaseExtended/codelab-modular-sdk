@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { firestore, FirestoreFieldPath, FirestoreFieldValue, Snapshot } from './firebase';
+import { firestore, FirestoreFieldPath, FirestoreFieldValue, QuerySnapshot } from './firebase';
 import { User } from './auth'
 import { PriceChangeRemote, SearchResult, TickerChange } from './models';
 import { logPerformance } from './perf';
@@ -120,7 +120,7 @@ export function subscribeToAllTickerChanges(callback: TickerChangesCallBack) {
 }
 
 // Format stock data in Firestore format (returned from `onSnapshot()`)
-function formatSDKStocks(snapshot: Snapshot): TickerChange[] {
+export function formatSDKStocks(snapshot: QuerySnapshot): TickerChange[] {
     const stocks: TickerChange[] = [];
     snapshot.forEach(docSnap => {
         if (!docSnap.data()) return;

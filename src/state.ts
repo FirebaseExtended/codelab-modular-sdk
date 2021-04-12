@@ -18,7 +18,8 @@ import { AppState } from './models';
 
 const STATE: AppState = {
     user: null,
-    userPageCreated: false
+    userPageCreated: false,
+    realtimeServicesLoaded: false // will be used at the last step of the codelab where we dynamically load realtime services
 };
 
 export function getState() {
@@ -31,4 +32,8 @@ export function setUser(user: User | null) {
 
 export function setUserPageCreated(created: boolean) {
     STATE.userPageCreated = created;
+}
+
+export function setRealtimeServicesLoaded(loaded: boolean) {
+    STATE.realtimeServicesLoaded = loaded;
 }

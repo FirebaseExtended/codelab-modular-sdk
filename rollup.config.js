@@ -37,7 +37,9 @@ const plugins = [
     mangle: { toplevel: true },
     compress: false
   }),
-  scss(),
+  scss({
+    output: 'dist/bundle.css'
+  }),
   copy({
     targets: [{ src: 'src/index.html', dest: 'dist' }]
   }),
@@ -53,7 +55,7 @@ export default [
   {
     input: 'src/main.ts',
     output: [
-      { file: 'dist/bundle.js', format: 'iife', sourcemap: true }
+      { file: 'dist/bundle.js', format: 'esm', sourcemap: true }
     ],
     plugins
   },
