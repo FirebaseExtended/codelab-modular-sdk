@@ -41,7 +41,10 @@ const plugins = [
     output: 'dist/bundle.css'
   }),
   copy({
-    targets: [{ src: 'src/index.html', dest: 'dist' }]
+    targets: [
+      { src: 'src/index.html', dest: 'dist' },
+      { src: 'images/favicon.png', dest: 'dist'}
+    ]
   }),
   gzipPlugin(),
   visualizer({
