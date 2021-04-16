@@ -34,8 +34,8 @@ export function subscribeToTickerChanges(user: User, callback: TickerChangesCall
     let unsubscribePrevTickerChanges: () => void;
 
     // Subscribe to watchlist changes. We will get an update whenever a ticker is added/deleted to the watchlist
-    const docRef = doc(firestore, `watchlist/${user.uid}`);
-    const unsubscribe = onSnapshot(docRef, snapshot => {
+    const watchlistRef = doc(firestore, `watchlist/${user.uid}`);
+    const unsubscribe = onSnapshot(watchlistRef, snapshot => {
         const doc = snapshot.data();
         const tickers = doc ? doc.tickers : [];
 
