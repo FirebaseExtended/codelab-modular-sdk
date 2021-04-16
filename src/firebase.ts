@@ -28,4 +28,4 @@ export const app = initializeApp({
 });
 
 export const firebaseAuth = initializeAuth(app, { persistence: [indexedDBLocalPersistence] });
-export const firestore = getFirestore(app);
+export const firestore = getFirestore();

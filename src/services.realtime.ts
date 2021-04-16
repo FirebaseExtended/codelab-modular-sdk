@@ -13,18 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { app } from './firebase';
 import { User } from './auth'
 import { PriceChangeRemote, TickerChange } from './models';
 import { collection, doc, onSnapshot, query, where, documentId, getFirestore } from 'firebase/firestore';
 import { formatSDKStocks } from './services';
 
-const firestore = getFirestore(app);
+const firestore = getFirestore();
 type TickerChangesCallBack = (changes: TickerChange[]) => void
+
+/**
+ * The function subscribes to user's watchlist, then subscribe to the price changes for the tickers in the watchlist.
+ * Whenever there is a change to user's watchlist, it unsubscribe and subscribe again using the latest list of tickers in the wathclist.
+ * 
+ * @param user - the user whose watchlist we want to subscribe to
+ * @param callback - the callback function that is invoked when price changes for any tickers in the user's watchlist
+ * @returns function to unsubscribe
+ */
 export function subscribeToTickerChanges(user: User, callback: TickerChangesCallBack) {
 
     let unsubscribePrevTickerChanges: () => void;
 
+    // Subscribe to watchlist changes. We will get an update whenever a ticker is added/deleted to the watchlist
     const docRef = doc(firestore, `watchlist/${user.uid}`);
     const unsubscribe = onSnapshot(docRef, snapshot => {
         const doc = snapshot.data();
@@ -37,11 +46,14 @@ export function subscribeToTickerChanges(user: User, callback: TickerChangesCall
         if (tickers.length === 0) {
             callback([]);
         } else {
-            const qry = query(
+            // Query to get current price for tickers in the watchlist
+            const priceQuery = query(
                 collection(firestore, 'current'),
                 where(documentId(), 'in', tickers)
             );
-            unsubscribePrevTickerChanges = onSnapshot<PriceChangeRemote>(qry, snapshot => {
+
+            // Subscribe to price changes for tickers in the watchlist
+            unsubscribePrevTickerChanges = onSnapshot<PriceChangeRemote>(priceQuery, snapshot => {
                 const stocks = formatSDKStocks(snapshot);
                 callback(stocks);
             });
@@ -56,8 +68,8 @@ export function subscribeToTickerChanges(user: User, callback: TickerChangesCall
 }
 
 export function subscribeToAllTickerChanges(callback: TickerChangesCallBack) {
-    const collRef = collection(firestore, 'current');
-    return onSnapshot<PriceChangeRemote>(collRef, snapshot => {
+    const tickersCollRef = collection(firestore, 'current');
+    return onSnapshot<PriceChangeRemote>(tickersCollRef, snapshot => {
         const stocks = formatSDKStocks(snapshot);
         callback(stocks);
     });
