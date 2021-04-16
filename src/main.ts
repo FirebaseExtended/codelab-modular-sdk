@@ -38,9 +38,9 @@ onUserChange(user => {
         
         // show loading screen in 500ms
         const timeoutId = setTimeout(() => {
-            renderLoginPage('Landing page', {
-                loading: true,
-                tableData: []
+            renderUserPage(user, {
+                loading: true, 
+                tableData: [] 
             });
         }, 500);
 
