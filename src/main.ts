@@ -89,7 +89,7 @@ onUserChange(async user => {
                 clearTimeout(timeoutId);
                 renderLoginPage('Landing page', { tableData: stockData })
             });
-        })
+        });
     }
 });
 
