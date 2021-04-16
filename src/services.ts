@@ -24,7 +24,8 @@ export async function search(input: string): Promise<SearchResult[]> {
         return [];
     }
 
-    const tickers = await firestore.collection('current').get();
+    const tickersCollRef = firestore.collection('current');
+    const tickers = await tickersCollRef.get();
 
     const result: SearchResult[] = [];
     // firestore doesn't support text search, so we filter on client side instead.
@@ -44,13 +45,15 @@ export async function search(input: string): Promise<SearchResult[]> {
 }
 
 export function addToWatchList(ticker: string, user: User) {
-    return firestore.collection('watchlist').doc(user.uid).set({
+    const watchlistRef = firestore.collection('watchlist').doc(user.uid);
+    return watchlistRef.set({
         tickers: FirestoreFieldValue.arrayUnion(ticker)
     }, { merge: true });
 }
 
 export function deleteFromWatchList(ticker: string, user: User) {
-    return firestore.collection('watchlist').doc(user.uid).set({
+    const watchlistRef = firestore.collection('watchlist').doc(user.uid);
+    return watchlistRef.set({
         tickers: FirestoreFieldValue.arrayRemove(ticker)
     }, { merge: true });
 }
@@ -70,7 +73,8 @@ export function subscribeToTickerChanges(user: User, callback: TickerChangesCall
     let unsubscribePrevTickerChanges: () => void;
 
     // Subscribe to watchlist changes. We will get an update whenever a ticker is added/deleted to the watchlist
-    const unsubscribe = firestore.collection('watchlist').doc(user.uid).onSnapshot(snapshot => {
+    const watchlistRef = firestore.collection('watchlist').doc(user.uid);
+    const unsubscribe = watchlistRef.onSnapshot(snapshot => {
         const doc = snapshot.data();
         const tickers = doc ? doc.tickers : [];
 
@@ -82,10 +86,8 @@ export function subscribeToTickerChanges(user: User, callback: TickerChangesCall
             callback([]);
         } else {
             // Subscribe to price changes for tickers in the watchlist
-            unsubscribePrevTickerChanges = firestore
-                .collection('current')
-                .where(FirestoreFieldPath.documentId(), 'in', tickers)
-                .onSnapshot(snapshot => {
+            const priceQuery = firestore.collection('current').where(FirestoreFieldPath.documentId(), 'in', tickers);
+            unsubscribePrevTickerChanges = priceQuery.onSnapshot(snapshot => {
                     if (firstload) {
                         performance && performance.measure("initial-data-load");
                         firstload = false;
@@ -106,9 +108,8 @@ export function subscribeToTickerChanges(user: User, callback: TickerChangesCall
 }
 
 export function subscribeToAllTickerChanges(callback: TickerChangesCallBack) {
-    return firestore
-        .collection('current')
-        .onSnapshot(snapshot => {
+    const tickersCollRef = firestore.collection('current');
+    return tickersCollRef.onSnapshot(snapshot => {
             if (firstload) {
                 performance && performance.measure("initialDataLoadTime");
                 firstload = false;
