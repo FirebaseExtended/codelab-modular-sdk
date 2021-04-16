@@ -80,8 +80,8 @@ export async function getTickers(user: User): Promise<string[]> {
 }
 
 export async function getAllTickerChanges(): Promise<TickerChange[]> {
-    const collRef = collection(firestore, 'current');
-    const snapshot = await getDocs<PriceChangeRemote>(collRef);
+    const tickersCollRef = collection(firestore, 'current');
+    const snapshot = await getDocs<PriceChangeRemote>(tickersCollRef);
     performance && performance.measure("initial-data-load");
     logPerformance();
     return formatSDKStocks(snapshot);
