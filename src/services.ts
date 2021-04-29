@@ -16,7 +16,7 @@
 import { firestore } from './firebase';
 import { User } from './auth'
 import { PriceChangeRemote, SearchResult, TickerChange } from './models';
-import { collection, getDocs, doc, setDoc, arrayUnion, arrayRemove, onSnapshot, query, where, documentId, QuerySnapshot } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, arrayUnion, arrayRemove, onSnapshot, query, where, documentId, QuerySnapshot, DocumentData } from 'firebase/firestore';
 import { logPerformance } from './perf';
 
 export async function search(input: string): Promise<SearchResult[]> {
@@ -92,7 +92,7 @@ export function subscribeToTickerChanges(user: User, callback: TickerChangesCall
             );
 
             // Subscribe to price changes for tickers in the watchlist
-            unsubscribePrevTickerChanges = onSnapshot<PriceChangeRemote>(priceQuery, snapshot => {
+            unsubscribePrevTickerChanges = onSnapshot(priceQuery, snapshot => {
                 if (firstload) {
                     performance && performance.measure("initial-data-load");
                     firstload = false;
@@ -113,7 +113,7 @@ export function subscribeToTickerChanges(user: User, callback: TickerChangesCall
 
 export function subscribeToAllTickerChanges(callback: TickerChangesCallBack) {
     const tickersCollRef = collection(firestore, 'current');
-    return onSnapshot<PriceChangeRemote>(tickersCollRef, snapshot => {
+    return onSnapshot(tickersCollRef, snapshot => {
         if (firstload) {
             performance && performance.measure("initial-data-load");
             firstload = false;
@@ -125,7 +125,7 @@ export function subscribeToAllTickerChanges(callback: TickerChangesCallBack) {
 }
 
 // Format stock data in Firestore format (returned from `onSnapshot()`)
-export function formatSDKStocks(snapshot: QuerySnapshot<PriceChangeRemote>): TickerChange[] {
+export function formatSDKStocks(snapshot: QuerySnapshot<any>): TickerChange[] {
     const stocks: TickerChange[] = [];
     //@ts-ignore
     snapshot.forEach(docSnap => {
