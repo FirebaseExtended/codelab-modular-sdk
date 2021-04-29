@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import { User } from './auth'
-import { PriceChangeRemote, TickerChange } from './models';
+import { TickerChange } from './models';
 import { collection, doc, onSnapshot, query, where, documentId, getFirestore } from 'firebase/firestore';
 import { formatSDKStocks } from './services';
 
@@ -53,7 +53,7 @@ export function subscribeToTickerChanges(user: User, callback: TickerChangesCall
             );
 
             // Subscribe to price changes for tickers in the watchlist
-            unsubscribePrevTickerChanges = onSnapshot<PriceChangeRemote>(priceQuery, snapshot => {
+            unsubscribePrevTickerChanges = onSnapshot(priceQuery, snapshot => {
                 const stocks = formatSDKStocks(snapshot);
                 callback(stocks);
             });
@@ -69,7 +69,7 @@ export function subscribeToTickerChanges(user: User, callback: TickerChangesCall
 
 export function subscribeToAllTickerChanges(callback: TickerChangesCallBack) {
     const tickersCollRef = collection(firestore, 'current');
-    return onSnapshot<PriceChangeRemote>(tickersCollRef, snapshot => {
+    return onSnapshot(tickersCollRef, snapshot => {
         const stocks = formatSDKStocks(snapshot);
         callback(stocks);
     });

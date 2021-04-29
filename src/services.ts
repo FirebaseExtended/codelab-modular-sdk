@@ -102,7 +102,7 @@ export function deleteFromWatchList(ticker: string, user: User) {
 }
 
 // Format stock data in Firestore format (returned from `onSnapshot()`)
-export function formatSDKStocks(snapshot: QuerySnapshot<PriceChangeRemote>): TickerChange[] {
+export function formatSDKStocks(snapshot: QuerySnapshot<any>): TickerChange[] {
     const stocks: TickerChange[] = [];
     //@ts-ignore
     snapshot.forEach(docSnap => {
