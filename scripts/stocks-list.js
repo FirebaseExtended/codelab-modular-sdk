@@ -28,5 +28,9 @@ exports.STOCK_LIST = [
   'CMG',
   'COST',
   'SBUX',
-  'SFIX'
+  'SFIX',
+  'GME',
+  'AMC',
+  'TSLA',
+  'GOOG'
 ];
